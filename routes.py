@@ -1,6 +1,5 @@
 import datetime
 import uuid
-from collections import defaultdict
 from flask import Blueprint, current_app, render_template, request, redirect, url_for
 
 pages = Blueprint("habits", __name__, template_folder="templates", static_folder="static")
@@ -27,11 +26,13 @@ def index():
         selected_date = today_at_midnight()
 
     habits_on_date = current_app.db.habits.find({"added":{"$lte": selected_date}})
+    #lte : later equal 어쩌고
 
     completions = [
         habit["habit"]
         for habit in current_app.db.completions.find({"date": selected_date})
     ]
+    # completions : db.completions에서 selected_date에 완료된 habit들의 id로 이루어진 list
 
     return render_template(
         "index.html",
@@ -64,7 +65,6 @@ def complete():
     habit = request.form.get("habitId")
     date = datetime.datetime.fromisoformat(date_string)
     current_app.db.completions.insert_one({"date": date, "habit": habit})
-
 
     return redirect(url_for("habits.index", date=date_string))
 
